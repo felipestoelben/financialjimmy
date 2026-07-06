@@ -1,0 +1,19 @@
+{
+  "name": "Jimmy Finanças",
+  "short_name": "Jimmy",
+  "description": "Controle financeiro pessoal simples e rápido",
+  "start_url": "/financialjimmy/",
+  "scope": "/financialjimmy/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F6FA",
+  "theme_color": "#1DAA55",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
