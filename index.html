@@ -78,6 +78,7 @@
     <div class="balance-card">
       <div class="balance-card-top">
         <span>Saldo atual</span>
+        <button class="eye-btn" id="btn-toggle-hide-values" title="Ocultar valores">👁</button>
       </div>
       <div class="balance-value" id="balance-total">R$ 0,00</div>
       <div class="balance-split">
@@ -89,6 +90,22 @@
           <span class="muted">Saídas</span>
           <div class="balance-expense-value" id="balance-expense">R$ 0,00</div>
         </div>
+      </div>
+    </div>
+
+    <div class="forecast-card">
+      <span class="muted">Previsto para <span id="forecast-month-label"></span></span>
+      <div class="forecast-value" id="forecast-next-month">R$ 0,00</div>
+    </div>
+
+    <div class="invest-card">
+      <div>
+        <span class="muted">Investido em <span id="invest-month-label"></span></span>
+        <div class="invest-value" id="invest-month">R$ 0,00</div>
+      </div>
+      <div>
+        <span class="muted">Total investido</span>
+        <div class="invest-value" id="invest-total">R$ 0,00</div>
       </div>
     </div>
 
@@ -112,13 +129,14 @@
   <main id="page-add" class="page hidden">
     <header class="topbar">
       <button class="icon-btn" id="btn-close-add">✕</button>
-      <span class="page-title">Nova transação</span>
+      <span class="page-title" id="add-page-title">Nova transação</span>
       <span style="width:32px"></span>
     </header>
 
     <div class="type-toggle">
       <button type="button" class="type-btn expense active" id="btn-type-expense">Despesa</button>
       <button type="button" class="type-btn income" id="btn-type-income">Receita</button>
+      <button type="button" class="type-btn investment" id="btn-type-investment">Investimento</button>
     </div>
 
     <div class="amount-display">
@@ -135,29 +153,29 @@
         <span>Descrição</span>
         <input type="text" id="input-description" placeholder="Ex.: Almoço, Uber, Salário..." />
       </label>
-      <label class="field">
-        <span>Data</span>
+      <label class="field" id="field-date">
+        <span id="label-date">Data</span>
         <input type="date" id="input-date" required />
       </label>
       <label class="field">
         <span>Forma de pagamento</span>
         <select id="input-payment"></select>
       </label>
-      <label class="checkbox-field hidden" id="field-installment-toggle">
-        <input type="checkbox" id="input-is-installment" />
-        <span>Compra parcelada no cartão</span>
-      </label>
-      <div class="installment-fields hidden" id="installment-fields">
-        <label class="field">
-          <span>Parcela atual</span>
-          <input type="number" id="input-installment-current" min="1" value="1" />
-        </label>
-        <label class="field">
-          <span>Total de parcelas</span>
-          <input type="number" id="input-installment-total" min="1" value="2" />
-        </label>
-        <p class="installment-hint">O valor digitado acima é o valor de cada parcela. Vamos criar um lançamento para cada mês, da parcela atual até a última.</p>
+      <div class="payment-toggle hidden" id="field-payment-mode">
+        <button type="button" class="type-btn active" id="btn-mode-avista">À vista</button>
+        <button type="button" class="type-btn" id="btn-mode-parcelado">Parcelado</button>
       </div>
+      <div class="installment-fields hidden" id="installment-fields">
+        <label class="field" style="grid-column: 1 / -1;">
+          <span>Número de parcelas</span>
+          <input type="number" id="input-installment-total" min="2" value="2" />
+        </label>
+        <p class="installment-hint">O valor digitado acima é o valor total da compra. Vamos dividir pelo número de parcelas e lançar uma a cada mês, começando na data escolhida.</p>
+      </div>
+      <label class="checkbox-field hidden" id="field-recurring-toggle">
+        <input type="checkbox" id="input-is-recurring" />
+        <span>Assinatura/recorrente (repete todo mês)</span>
+      </label>
       <button type="submit" class="btn btn-primary" id="btn-save-tx" disabled>Salvar transação</button>
       <p class="error-msg" id="add-tx-error"></p>
     </form>
@@ -188,6 +206,23 @@
         <div class="profile-email" id="profile-email">—</div>
       </div>
     </div>
+    <h2 class="section-title">Preferências</h2>
+    <ul class="settings-list">
+      <li class="settings-row">
+        <span>Modo escuro</span>
+        <label class="switch">
+          <input type="checkbox" id="input-dark-mode" />
+          <span class="switch-track"></span>
+        </label>
+      </li>
+      <li class="settings-row">
+        <span>Ocultar valores</span>
+        <label class="switch">
+          <input type="checkbox" id="input-hide-values" />
+          <span class="switch-track"></span>
+        </label>
+      </li>
+    </ul>
     <ul class="settings-list">
       <li class="settings-danger" id="btn-signout">Sair da conta</li>
     </ul>
