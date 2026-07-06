@@ -281,10 +281,15 @@ function resetAddForm() {
   $('input-amount').value = '';
   $('input-description').value = '';
   $('input-date').value = new Date().toISOString().slice(0, 10);
+  $('input-is-installment').checked = false;
+  $('input-installment-current').value = 1;
+  $('input-installment-total').value = 2;
+  hide($('installment-fields'));
   setTxType('expense');
   $('btn-save-tx').disabled = true;
   $('add-tx-error').textContent = '';
   $('input-payment').innerHTML = PAYMENT_METHODS.map((p) => `<option>${p}</option>`).join('');
+  updateInstallmentToggleVisibility();
 }
 
 function setTxType(type) {
@@ -294,9 +299,35 @@ function setTxType(type) {
   const cats = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   $('input-category').innerHTML = cats.map((c) => `<option value="${c.id}">${c.icon} ${c.label}</option>`).join('');
   document.querySelector('.amount-display').className = `amount-display ${type}`;
+  updateInstallmentToggleVisibility();
 }
 $('btn-type-expense').addEventListener('click', () => setTxType('expense'));
 $('btn-type-income').addEventListener('click', () => setTxType('income'));
+
+// ---------- credit card installments ----------
+function updateInstallmentToggleVisibility() {
+  const isCreditCard = $('input-payment').value === 'Cartão de crédito';
+  const canInstall = currentTxType === 'expense' && isCreditCard;
+  $('field-installment-toggle').classList.toggle('hidden', !canInstall);
+  if (!canInstall) {
+    $('input-is-installment').checked = false;
+    hide($('installment-fields'));
+  }
+}
+$('input-payment').addEventListener('change', updateInstallmentToggleVisibility);
+$('input-is-installment').addEventListener('change', (e) => {
+  $('installment-fields').classList.toggle('hidden', !e.target.checked);
+});
+
+function addMonthsClamped(dateStr, monthsToAdd) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const targetIndex = m - 1 + monthsToAdd;
+  const targetYear = y + Math.floor(targetIndex / 12);
+  const targetMonth = ((targetIndex % 12) + 12) % 12;
+  const lastDay = new Date(targetYear, targetMonth + 1, 0).getDate();
+  const day = Math.min(d, lastDay);
+  return `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
 
 $('input-amount').addEventListener('input', (e) => {
   const digits = e.target.value.replace(/\D/g, '');
@@ -311,19 +342,49 @@ $('btn-close-add').addEventListener('click', () => showPage('home'));
 $('form-add-tx').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (amountCents <= 0) return;
+
+  const isInstallment = !$('field-installment-toggle').classList.contains('hidden') && $('input-is-installment').checked;
+  const installmentCurrent = Math.max(1, parseInt($('input-installment-current').value, 10) || 1);
+  const installmentTotal = Math.max(installmentCurrent, parseInt($('input-installment-total').value, 10) || installmentCurrent);
+  if (isInstallment && installmentTotal < installmentCurrent) {
+    $('add-tx-error').textContent = 'O total de parcelas precisa ser maior ou igual à parcela atual.';
+    return;
+  }
+
   $('btn-save-tx').disabled = true;
+  const baseDescription = $('input-description').value.trim();
+  const baseData = {
+    type: currentTxType,
+    amount: amountCents / 100,
+    category: $('input-category').value,
+    date: $('input-date').value,
+    paymentMethod: $('input-payment').value,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+
   try {
     const uid = auth.currentUser.uid;
-    await db.collection('users').doc(uid).collection('transactions').add({
-      type: currentTxType,
-      amount: amountCents / 100,
-      category: $('input-category').value,
-      description: $('input-description').value.trim(),
-      date: $('input-date').value,
-      paymentMethod: $('input-payment').value,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-    toast('Transação salva!');
+    const txCollection = db.collection('users').doc(uid).collection('transactions');
+    if (isInstallment) {
+      const groupId = txCollection.doc().id;
+      const batch = db.batch();
+      for (let n = installmentCurrent; n <= installmentTotal; n++) {
+        const docRef = txCollection.doc();
+        batch.set(docRef, {
+          ...baseData,
+          description: `${baseDescription || 'Compra parcelada'} (parcela ${n}/${installmentTotal})`,
+          date: addMonthsClamped(baseData.date, n - installmentCurrent),
+          installmentGroupId: groupId,
+          installmentIndex: n,
+          installmentTotal,
+        });
+      }
+      await batch.commit();
+      toast(`${installmentTotal - installmentCurrent + 1} parcelas lançadas!`);
+    } else {
+      await txCollection.add({ ...baseData, description: baseDescription });
+      toast('Transação salva!');
+    }
     showPage('home');
   } catch (err) {
     console.error(err);
