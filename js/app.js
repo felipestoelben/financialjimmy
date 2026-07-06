@@ -304,7 +304,7 @@ function renderDonut(byCategory, total) {
   const donut = $('donut-chart');
   const legend = $('category-legend');
   if (!entries.length || total <= 0) {
-    donut.style.background = '#EEF0F4';
+    donut.style.background = '';
     legend.innerHTML = '';
     show($('summary-empty'));
     return;
