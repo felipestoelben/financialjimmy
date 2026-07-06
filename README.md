@@ -69,6 +69,17 @@ publicado direto pelo GitHub Pages.
 - Histórico com filtro por mês e busca por texto, exclusão de lançamentos.
 - Tudo sincronizado em tempo real via Firestore, por usuário.
 
+## Sobre o ícone do app
+
+O app usa um ícone SVG (`icons/icon.svg`), que funciona bem para instalar no
+Android/Chrome e no computador. O iOS (tela de início do iPhone) funciona
+melhor com um ícone PNG dedicado, que não foi incluído aqui porque as
+ferramentas usadas para montar este repositório não conseguem enviar
+arquivos binários com segurança. Se quiser um ícone melhor no iPhone, basta
+gerar um PNG quadrado (192x192 e 512x512) e enviar pela própria interface do
+GitHub (botão "Add file" → "Upload files" em `icons/`), depois referenciá-lo
+em `manifest.json` e no `<link rel="apple-touch-icon">` de `index.html`.
+
 ## O que ficou como próximo passo (não implementado ainda)
 
 - Telas de "Metas financeiras", "Categorias personalizadas", "Formas de
