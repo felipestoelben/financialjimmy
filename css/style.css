@@ -285,6 +285,32 @@ html, body {
 
 .add-form .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
 
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text);
+  padding: 4px 0;
+}
+.checkbox-field input { width: 18px; height: 18px; accent-color: var(--green); }
+
+.installment-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px;
+}
+.installment-hint {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* ---------- profile ---------- */
 .profile-card { display: flex; align-items: center; gap: 14px; }
 .avatar {
