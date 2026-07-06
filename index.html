@@ -143,6 +143,21 @@
         <span>Forma de pagamento</span>
         <select id="input-payment"></select>
       </label>
+      <label class="checkbox-field hidden" id="field-installment-toggle">
+        <input type="checkbox" id="input-is-installment" />
+        <span>Compra parcelada no cartão</span>
+      </label>
+      <div class="installment-fields hidden" id="installment-fields">
+        <label class="field">
+          <span>Parcela atual</span>
+          <input type="number" id="input-installment-current" min="1" value="1" />
+        </label>
+        <label class="field">
+          <span>Total de parcelas</span>
+          <input type="number" id="input-installment-total" min="1" value="2" />
+        </label>
+        <p class="installment-hint">O valor digitado acima é o valor de cada parcela. Vamos criar um lançamento para cada mês, da parcela atual até a última.</p>
+      </div>
       <button type="submit" class="btn btn-primary" id="btn-save-tx" disabled>Salvar transação</button>
       <p class="error-msg" id="add-tx-error"></p>
     </form>
