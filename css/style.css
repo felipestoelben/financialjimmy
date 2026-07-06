@@ -171,13 +171,54 @@ html, body {
   padding: 20px;
   margin-bottom: 20px;
 }
-.balance-card-top { opacity: 0.85; font-size: 14px; margin-bottom: 8px; }
+.balance-card-top {
+  opacity: 0.85;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.eye-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  opacity: 0.85;
+  padding: 0;
+}
+.eye-btn.is-hidden { opacity: 0.55; }
+
+.forecast-card {
+  background: #FFF7E6;
+  border: 1px solid #FFE1A8;
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  color: #8A5A00;
+}
+.forecast-card .muted { font-size: 13px; opacity: 0.85; }
+.forecast-value { font-size: 18px; font-weight: 700; margin-top: 2px; color: #B7791F; }
 .balance-value { font-size: 32px; font-weight: 700; margin-bottom: 18px; }
 .balance-split { display: flex; gap: 32px; }
 .balance-split .muted { opacity: 0.85; font-size: 13px; }
 .balance-income-value, .balance-expense-value { font-size: 16px; margin-top: 2px; font-weight: 700; }
 .balance-income-value { color: #EAFBF0; }
 .balance-expense-value { color: #FFE1E2; }
+
+.invest-card {
+  display: flex;
+  gap: 32px;
+  background: #F5F2FF;
+  border: 1px solid #E0D6FF;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  color: #4C2F9E;
+}
+.invest-card .muted { font-size: 13px; opacity: 0.85; }
+.invest-value { font-size: 18px; font-weight: 700; margin-top: 2px; color: #7C3AED; }
 
 .section-title { font-size: 16px; margin: 0 0 12px; }
 .section-header { display: flex; align-items: center; justify-content: space-between; }
@@ -218,6 +259,7 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 12px 14px;
+  cursor: pointer;
 }
 .tx-icon {
   width: 40px; height: 40px;
@@ -231,6 +273,7 @@ html, body {
 .tx-info .muted { font-size: 12px; color: var(--muted); }
 .expense-value { color: var(--red); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .income-value { color: var(--green-dark); font-weight: 700; font-size: 14px; white-space: nowrap; }
+.investment-value { color: #7C3AED; font-weight: 700; font-size: 14px; white-space: nowrap; }
 .tx-delete {
   background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 4px;
 }
@@ -249,16 +292,27 @@ html, body {
 }
 .type-btn {
   flex: 1;
-  padding: 10px;
+  padding: 10px 4px;
   border: none;
   background: none;
   border-radius: 9px;
   font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
   color: var(--muted);
 }
 .type-btn.expense.active { background: #FDECEC; color: var(--red); }
 .type-btn.income.active { background: #E6F6EC; color: var(--green-dark); }
+.type-btn.investment.active { background: #EDE7FE; color: #7C3AED; }
+.type-btn.active { background: #E6F0FE; color: #2B5FE0; }
+
+.payment-toggle {
+  display: flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+}
 
 .amount-display {
   display: flex;
@@ -282,6 +336,7 @@ html, body {
 .amount-display input:focus { outline: none; }
 .amount-display.income input { color: var(--green-dark); }
 .amount-display.expense input { color: var(--red); }
+.amount-display.investment input { color: #7C3AED; }
 
 .add-form .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
 
@@ -325,7 +380,7 @@ html, body {
 }
 .profile-name { font-weight: 700; font-size: 16px; }
 .profile-email { color: var(--muted); font-size: 13px; }
-.settings-list { list-style: none; margin: 0; padding: 0; }
+.settings-list { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .settings-danger {
   background: var(--card);
   border: 1px solid var(--border);
@@ -335,6 +390,36 @@ html, body {
   font-weight: 600;
   cursor: pointer;
 }
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+.switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track {
+  position: absolute; inset: 0;
+  background: var(--border);
+  border-radius: 999px;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.switch-track::before {
+  content: "";
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+.switch input:checked + .switch-track { background: var(--green); }
+.switch input:checked + .switch-track::before { transform: translateX(18px); }
 .app-version { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
 
 /* ---------- bottom nav ---------- */
@@ -407,4 +492,37 @@ html, body {
   }
   .donut { background: #2A2D34; }
   .donut::after { background: var(--card); }
+  .forecast-card { background: rgba(183,121,31,0.15); border-color: rgba(183,121,31,0.4); color: #FFD98C; }
+  .forecast-value { color: #FFD98C; }
+  .invest-card { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); color: #D9C8FF; }
+  .invest-value { color: #C9A9FF; }
 }
+
+/* Manual theme toggle (Perfil > Preferências) always wins over the OS setting. */
+:root[data-theme="dark"] {
+  --bg: #101114;
+  --card: #1B1D22;
+  --text: #F2F3F5;
+  --muted: #9096A2;
+  --border: #2A2D34;
+}
+:root[data-theme="dark"] .donut { background: #2A2D34; }
+:root[data-theme="dark"] .donut::after { background: var(--card); }
+:root[data-theme="dark"] .forecast-card { background: rgba(183,121,31,0.15); border-color: rgba(183,121,31,0.4); color: #FFD98C; }
+:root[data-theme="dark"] .forecast-value { color: #FFD98C; }
+:root[data-theme="dark"] .invest-card { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); color: #D9C8FF; }
+:root[data-theme="dark"] .invest-value { color: #C9A9FF; }
+
+:root[data-theme="light"] {
+  --bg: #F5F6FA;
+  --card: #FFFFFF;
+  --text: #1B1B1F;
+  --muted: #8A8F98;
+  --border: #E8E9EE;
+}
+:root[data-theme="light"] .donut { background: #EEF0F4; }
+:root[data-theme="light"] .donut::after { background: var(--card); }
+:root[data-theme="light"] .forecast-card { background: #FFF7E6; border-color: #FFE1A8; color: #8A5A00; }
+:root[data-theme="light"] .forecast-value { color: #B7791F; }
+:root[data-theme="light"] .invest-card { background: #F5F2FF; border-color: #E0D6FF; color: #4C2F9E; }
+:root[data-theme="light"] .invest-value { color: #7C3AED; }
