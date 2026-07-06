@@ -18,8 +18,8 @@
   --radius: 20px;
   --radius-lg: 26px;
   --radius-sm: 14px;
-  --shadow-xs: 0 1px 2px rgba(20,20,15,0.05);
-  --shadow-sm: 0 2px 8px rgba(20,20,15,0.06), 0 1px 2px rgba(20,20,15,0.04);
+  --shadow-xs: 0 1px 2px rgba(20,20,15,0.05), inset 0 1px 0 rgba(255,255,255,0.55);
+  --shadow-sm: 0 2px 8px rgba(20,20,15,0.06), 0 1px 2px rgba(20,20,15,0.04), inset 0 1px 0 rgba(255,255,255,0.55);
   --shadow-md: 0 12px 28px -10px rgba(20,20,15,0.18);
   --shadow-lg: 0 20px 48px -14px rgba(20,20,15,0.28);
   --font: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -182,7 +182,10 @@ body {
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--card);
-  font-size: 16px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   box-shadow: var(--shadow-xs);
   transition: transform 0.12s ease;
@@ -243,12 +246,21 @@ body {
   background: none;
   border: none;
   color: #fff;
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
   opacity: 0.85;
   padding: 0;
 }
 .eye-btn.is-hidden { opacity: 0.55; }
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.85;
+}
 
 .forecast-card {
   position: relative;
@@ -260,11 +272,9 @@ body {
   color: var(--gold);
   box-shadow: var(--shadow-xs);
 }
-.forecast-card .muted { font-size: 13px; opacity: 0.85; font-weight: 600; }
 .forecast-value { font-size: 19px; font-weight: 800; margin-top: 3px; letter-spacing: -0.02em; }
 .balance-value { position: relative; font-size: 36px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.03em; }
 .balance-split { position: relative; display: flex; gap: 32px; }
-.balance-split .muted { opacity: 0.85; font-size: 13px; font-weight: 600; }
 .balance-income-value, .balance-expense-value { font-size: 17px; margin-top: 3px; font-weight: 800; letter-spacing: -0.02em; }
 .balance-income-value { color: #EAFBF0; }
 .balance-expense-value { color: #FFE6E4; }
@@ -280,7 +290,6 @@ body {
   color: var(--violet);
   box-shadow: var(--shadow-xs);
 }
-.invest-card .muted { font-size: 13px; opacity: 0.85; font-weight: 600; }
 .invest-value { font-size: 19px; font-weight: 800; margin-top: 3px; letter-spacing: -0.02em; }
 
 .section-title { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 14px; }
@@ -454,7 +463,7 @@ body {
   font-size: 20px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), 0 0 0 4px var(--brand-tint);
 }
 .profile-name { font-weight: 800; font-size: 16px; letter-spacing: -0.02em; }
 .profile-email { color: var(--muted); font-size: 13px; font-weight: 500; }
@@ -511,9 +520,9 @@ body {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
   transform: translateX(-50%);
   width: calc(100% - 32px);
-  max-width: 420px;
+  max-width: 440px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   align-items: center;
   gap: 2px;
   background: var(--card-translucent);
@@ -522,7 +531,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 8px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.4);
   z-index: 10;
 }
 .nav-btn {
@@ -532,35 +541,34 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
   font-family: var(--font);
-  font-size: 10.5px;
-  font-weight: 700;
   color: var(--muted);
   cursor: pointer;
   padding: 9px 0;
   border-radius: 999px;
   transition: background 0.15s ease, color 0.15s ease;
 }
-.nav-btn span { font-size: 18px; line-height: 1; }
+.nav-icon { width: 21px; height: 21px; }
+.nav-label { font-size: 10px; font-weight: 700; letter-spacing: -0.01em; }
 .nav-btn.active { color: var(--brand-700); background: var(--brand-tint); }
 .nav-add {
   position: relative;
   top: -20px;
   padding: 0;
 }
-.nav-add span {
+.nav-add-circle {
   width: 56px; height: 56px;
   border-radius: 50%;
   background: linear-gradient(150deg, var(--brand) 0%, var(--brand-700) 100%);
   color: #fff;
-  font-size: 26px;
   display: flex; align-items: center; justify-content: center;
   border: 4px solid var(--card);
-  box-shadow: 0 10px 24px -6px rgba(18,161,80,0.55), var(--shadow-md);
+  box-shadow: 0 10px 24px -6px rgba(18,161,80,0.55), var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.3);
   transition: transform 0.12s ease;
 }
-.nav-add:active span { transform: scale(0.92); }
+.nav-add-circle svg { width: 23px; height: 23px; }
+.nav-add:active .nav-add-circle { transform: scale(0.92); }
 
 /* ---------- toast ---------- */
 .toast {
@@ -586,7 +594,8 @@ body {
     --text: #F2F1ED;
     --muted: #9B968C;
     --border: rgba(255,255,255,0.09);
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
     --shadow-md: 0 12px 28px -10px rgba(0,0,0,0.5);
     --shadow-lg: 0 20px 48px -14px rgba(0,0,0,0.6);
   }
@@ -602,7 +611,8 @@ body {
   --text: #F2F1ED;
   --muted: #9B968C;
   --border: rgba(255,255,255,0.09);
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
   --shadow-md: 0 12px 28px -10px rgba(0,0,0,0.5);
   --shadow-lg: 0 20px 48px -14px rgba(0,0,0,0.6);
 }
@@ -616,7 +626,8 @@ body {
   --text: #14181B;
   --muted: #767268;
   --border: rgba(20,20,15,0.09);
-  --shadow-sm: 0 2px 8px rgba(20,20,15,0.06), 0 1px 2px rgba(20,20,15,0.04);
+  --shadow-xs: 0 1px 2px rgba(20,20,15,0.05), inset 0 1px 0 rgba(255,255,255,0.55);
+  --shadow-sm: 0 2px 8px rgba(20,20,15,0.06), 0 1px 2px rgba(20,20,15,0.04), inset 0 1px 0 rgba(255,255,255,0.55);
   --shadow-md: 0 12px 28px -10px rgba(20,20,15,0.18);
   --shadow-lg: 0 20px 48px -14px rgba(20,20,15,0.28);
 }

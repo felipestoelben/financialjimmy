@@ -67,7 +67,8 @@ $('input-dark-mode').addEventListener('change', (e) => {
 
 function applyHideValuesUI() {
   const btn = $('btn-toggle-hide-values');
-  btn.textContent = valuesHidden ? '🙈' : '👁';
+  btn.querySelector('.icon-eye-open').classList.toggle('hidden', valuesHidden);
+  btn.querySelector('.icon-eye-closed').classList.toggle('hidden', !valuesHidden);
   btn.classList.toggle('is-hidden', valuesHidden);
   $('input-hide-values').checked = valuesHidden;
 }
@@ -77,6 +78,7 @@ function setValuesHidden(hidden) {
   applyHideValuesUI();
   renderHome();
   renderHistory();
+  renderInvestments();
 }
 $('btn-toggle-hide-values').addEventListener('click', () => setValuesHidden(!valuesHidden));
 $('input-hide-values').addEventListener('change', (e) => setValuesHidden(e.target.checked));
@@ -198,6 +200,7 @@ function listenToTransactions(uid) {
       populateMonthSelects();
       renderHome();
       renderHistory();
+      renderInvestments();
       topUpRecurringSeries().catch((err) => console.error('Falha ao renovar assinaturas recorrentes', err));
     }, (err) => {
       console.error(err);
@@ -259,7 +262,7 @@ function populateMonthSelects() {
   currentHomeMonth = $('home-month-select').value;
   currentHistoryMonth = $('history-month-select').value;
 }
-$('home-month-select').addEventListener('change', (e) => { currentHomeMonth = e.target.value; renderHome(); });
+$('home-month-select').addEventListener('change', (e) => { currentHomeMonth = e.target.value; renderHome(); renderInvestments(); });
 $('history-month-select').addEventListener('change', (e) => { currentHistoryMonth = e.target.value; renderHistory(); });
 $('history-search').addEventListener('input', () => renderHistory());
 $('btn-see-all').addEventListener('click', () => { $('history-month-select').value = currentHomeMonth; currentHistoryMonth = currentHomeMonth; showPage('history'); renderHistory(); });
@@ -292,39 +295,56 @@ function renderHome() {
   txs.filter((t) => t.type === 'expense').forEach((t) => {
     byCategory[t.category] = (byCategory[t.category] || 0) + t.amount;
   });
-  renderDonut(byCategory, expense);
+  renderDonut(byCategory, expense, 'expense', $('donut-chart'), $('category-legend'), $('summary-empty'));
 
   const recent = allTransactions.slice(0, 5);
   $('recent-tx-list').innerHTML = recent.map(renderTxRow).join('') || '<li class="empty-hint">Nenhuma transação ainda.</li>';
   attachTxRowHandlers($('recent-tx-list'));
 }
 
-function renderDonut(byCategory, total) {
+function renderInvestments() {
+  const invested = txForMonth(currentHomeMonth).filter((t) => t.type === 'investment').reduce((s, t) => s + t.amount, 0);
+  $('invest-page-month-label').textContent = monthLabel(currentHomeMonth);
+  $('invest-page-month-value').textContent = fmtBRL(invested);
+
+  const investmentTx = allTransactions.filter((t) => t.type === 'investment');
+  const totalInvested = investmentTx.reduce((s, t) => s + t.amount, 0);
+  $('invest-page-total-value').textContent = fmtBRL(totalInvested);
+
+  const byCategory = {};
+  investmentTx.forEach((t) => { byCategory[t.category] = (byCategory[t.category] || 0) + t.amount; });
+  renderDonut(byCategory, totalInvested, 'investment', $('donut-chart-invest'), $('category-legend-invest'), $('invest-summary-empty'));
+
+  $('invest-tx-list').innerHTML = investmentTx.map(renderTxRow).join('') || '<li class="empty-hint">Nenhum investimento registrado ainda.</li>';
+  attachTxRowHandlers($('invest-tx-list'));
+}
+
+function renderDonut(byCategory, total, type, donutEl, legendEl, emptyEl) {
   const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
-  const donut = $('donut-chart');
-  const legend = $('category-legend');
   if (!entries.length || total <= 0) {
-    donut.style.background = '';
-    legend.innerHTML = '';
-    show($('summary-empty'));
+    donutEl.style.background = '';
+    legendEl.innerHTML = '';
+    show(emptyEl);
     return;
   }
-  hide($('summary-empty'));
+  hide(emptyEl);
   let acc = 0;
   const stops = entries.map(([catId, value]) => {
-    const cat = findCategory('expense', catId);
+    const cat = findCategory(type, catId);
     const pct = (value / total) * 100;
     const from = acc;
     acc += pct;
     return `${cat.color} ${from}% ${acc}%`;
   });
-  donut.style.background = `conic-gradient(${stops.join(', ')})`;
-  legend.innerHTML = entries.map(([catId, value]) => {
-    const cat = findCategory('expense', catId);
+  donutEl.style.background = `conic-gradient(${stops.join(', ')})`;
+  legendEl.innerHTML = entries.map(([catId, value]) => {
+    const cat = findCategory(type, catId);
     const pct = Math.round((value / total) * 100);
     return `<li><span class="dot" style="background:${cat.color}"></span>${cat.label}<b>${pct}%</b><span class="muted">${fmtBRL(value)}</span></li>`;
   }).join('');
 }
+
+const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>';
 
 function renderTxRow(t) {
   const cat = findCategory(t.type, t.category);
@@ -338,7 +358,7 @@ function renderTxRow(t) {
       <span class="muted">${cat.label}${recurringTag}</span>
     </span>
     <span class="${cls}">${sign} ${fmtBRL(t.amount)}</span>
-    <button class="tx-delete" title="Excluir">✕</button>
+    <button class="tx-delete" title="Excluir">${ICON_X}</button>
   </li>`;
 }
 function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }

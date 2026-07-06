@@ -72,44 +72,49 @@
       <div>
         <div class="greeting" id="home-greeting">Olá!</div>
       </div>
-      <button class="icon-btn" id="btn-logout" title="Sair da conta">⎋</button>
+      <button class="icon-btn" id="btn-logout" title="Sair da conta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M16 16l4-4-4-4"/><path d="M20 12H9"/></svg>
+      </button>
     </header>
 
     <div class="month-row">
-      <span>Visão geral</span>
+      <span class="eyebrow">Visão geral</span>
       <select id="home-month-select"></select>
     </div>
 
     <div class="balance-card">
       <div class="balance-card-top">
-        <span>Saldo atual</span>
-        <button class="eye-btn" id="btn-toggle-hide-values" title="Ocultar valores">👁</button>
+        <span class="eyebrow">Saldo atual</span>
+        <button class="eye-btn" id="btn-toggle-hide-values" title="Ocultar valores">
+          <svg class="icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="icon-eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 5.1c.7-.1 1.4-.1 2.1-.1 6.5 0 10.5 7 10.5 7a14 14 0 0 1-3.2 3.9M6.2 6.3A13.7 13.7 0 0 0 1.5 12s4 7 10.5 7c1.3 0 2.6-.2 3.7-.6"/></svg>
+        </button>
       </div>
       <div class="balance-value" id="balance-total">R$ 0,00</div>
       <div class="balance-split">
         <div>
-          <span class="muted">Entradas</span>
+          <span class="eyebrow">Entradas</span>
           <div class="balance-income-value" id="balance-income">R$ 0,00</div>
         </div>
         <div>
-          <span class="muted">Saídas</span>
+          <span class="eyebrow">Saídas</span>
           <div class="balance-expense-value" id="balance-expense">R$ 0,00</div>
         </div>
       </div>
     </div>
 
     <div class="forecast-card">
-      <span class="muted">Previsto para <span id="forecast-month-label"></span></span>
+      <span class="eyebrow">Previsto para <span id="forecast-month-label"></span></span>
       <div class="forecast-value" id="forecast-next-month">R$ 0,00</div>
     </div>
 
     <div class="invest-card">
       <div>
-        <span class="muted">Investido em <span id="invest-month-label"></span></span>
+        <span class="eyebrow">Investido em <span id="invest-month-label"></span></span>
         <div class="invest-value" id="invest-month">R$ 0,00</div>
       </div>
       <div>
-        <span class="muted">Total investido</span>
+        <span class="eyebrow">Total investido</span>
         <div class="invest-value" id="invest-total">R$ 0,00</div>
       </div>
     </div>
@@ -133,7 +138,9 @@
   <!-- ADD TRANSACTION -->
   <main id="page-add" class="page hidden">
     <header class="topbar">
-      <button class="icon-btn" id="btn-close-add">✕</button>
+      <button class="icon-btn" id="btn-close-add">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>
+      </button>
       <span class="page-title" id="add-page-title">Nova transação</span>
       <span style="width:32px"></span>
     </header>
@@ -199,6 +206,36 @@
     <p class="empty-hint hidden" id="history-empty">Nenhuma transação neste mês.</p>
   </main>
 
+  <!-- INVESTMENTS -->
+  <main id="page-investments" class="page hidden">
+    <header class="topbar">
+      <span class="page-title">Investimentos</span>
+    </header>
+
+    <div class="invest-card">
+      <div>
+        <span class="eyebrow">Investido em <span id="invest-page-month-label"></span></span>
+        <div class="invest-value" id="invest-page-month-value">R$ 0,00</div>
+      </div>
+      <div>
+        <span class="eyebrow">Total investido</span>
+        <div class="invest-value" id="invest-page-total-value">R$ 0,00</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Carteira por categoria</h2>
+    <div class="summary-card">
+      <div class="donut-wrap">
+        <div class="donut" id="donut-chart-invest"></div>
+      </div>
+      <ul class="legend" id="category-legend-invest"></ul>
+      <p class="empty-hint hidden" id="invest-summary-empty">Nenhum investimento registrado ainda.</p>
+    </div>
+
+    <h2 class="section-title">Histórico de investimentos</h2>
+    <ul class="tx-list" id="invest-tx-list"></ul>
+  </main>
+
   <!-- PROFILE -->
   <main id="page-profile" class="page hidden">
     <header class="topbar">
@@ -236,10 +273,27 @@
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <button class="nav-btn active" data-page="home"><span>🏠</span>Início</button>
-    <button class="nav-btn" data-page="history"><span>📋</span>Transações</button>
-    <button class="nav-btn nav-add" id="btn-open-add"><span>+</span></button>
-    <button class="nav-btn" data-page="profile"><span>👤</span>Perfil</button>
+    <button class="nav-btn active" data-page="home">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9"/></svg>
+      <span class="nav-label">Início</span>
+    </button>
+    <button class="nav-btn" data-page="history">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+      <span class="nav-label">Transações</span>
+    </button>
+    <button class="nav-btn nav-add" id="btn-open-add" title="Nova transação">
+      <span class="nav-add-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      </span>
+    </button>
+    <button class="nav-btn" data-page="investments">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></svg>
+      <span class="nav-label">Investir</span>
+    </button>
+    <button class="nav-btn" data-page="profile">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.3"/><path d="M5 20c1.2-3.7 4.2-5.6 7-5.6s5.8 1.9 7 5.6"/></svg>
+      <span class="nav-label">Perfil</span>
+    </button>
   </nav>
 </section>
 
