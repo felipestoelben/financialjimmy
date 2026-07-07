@@ -186,11 +186,15 @@
         <button type="button" class="type-btn" id="btn-mode-parcelado">Parcelado</button>
       </div>
       <div class="installment-fields hidden" id="installment-fields">
-        <label class="field" style="grid-column: 1 / -1;">
-          <span>Número de parcelas</span>
+        <label class="field">
+          <span>Parcela atual</span>
+          <input type="number" id="input-installment-current" min="1" value="1" />
+        </label>
+        <label class="field">
+          <span>Total de parcelas</span>
           <input type="number" id="input-installment-total" min="2" value="2" />
         </label>
-        <p class="installment-hint">O valor digitado acima é o valor total da compra. Vamos dividir pelo número de parcelas e lançar uma a cada mês, começando na data escolhida.</p>
+        <p class="installment-hint">O valor digitado acima é o valor de cada parcela. Se a compra é nova, deixe "Parcela atual" em 1. Se já vem pagando há um tempo, coloque em qual parcela você está agora — vamos lançar dela até a última, uma a cada mês.</p>
       </div>
       <label class="checkbox-field hidden" id="field-recurring-toggle">
         <input type="checkbox" id="input-is-recurring" />

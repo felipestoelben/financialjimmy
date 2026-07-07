@@ -425,6 +425,7 @@ function resetAddForm() {
   $('input-description').value = '';
   $('input-date').value = new Date().toISOString().slice(0, 10);
   $('input-installment-total').value = 2;
+  $('input-installment-current').value = 1;
   $('input-is-recurring').checked = false;
   $('input-is-pending').checked = false;
   setPaymentMode('avista');
@@ -459,7 +460,7 @@ function setPaymentMode(mode) {
   $('btn-mode-avista').classList.toggle('active', mode === 'avista');
   $('btn-mode-parcelado').classList.toggle('active', mode === 'parcelado');
   $('installment-fields').classList.toggle('hidden', mode !== 'parcelado');
-  $('label-date').textContent = mode === 'parcelado' ? 'Data da 1ª parcela' : 'Data';
+  updateInstallmentDateLabel();
   updatePendingToggleVisibility();
 }
 $('btn-mode-avista').addEventListener('click', () => setPaymentMode('avista'));
@@ -467,6 +468,13 @@ $('btn-mode-parcelado').addEventListener('click', () => {
   $('input-is-recurring').checked = false;
   setPaymentMode('parcelado');
 });
+
+function updateInstallmentDateLabel() {
+  if (paymentMode !== 'parcelado') { $('label-date').textContent = 'Data'; return; }
+  const current = Math.max(1, parseInt($('input-installment-current').value, 10) || 1);
+  $('label-date').textContent = current > 1 ? `Data da parcela ${current}` : 'Data da 1ª parcela';
+}
+$('input-installment-current').addEventListener('input', updateInstallmentDateLabel);
 
 function updatePaymentModeVisibility() {
   const isCreditCard = $('input-payment').value === 'Cartão de crédito';
@@ -530,6 +538,7 @@ $('form-add-tx').addEventListener('submit', async (e) => {
 
   const isInstallment = !editingTxId && !$('field-payment-mode').classList.contains('hidden') && paymentMode === 'parcelado';
   const installmentTotal = Math.max(2, parseInt($('input-installment-total').value, 10) || 2);
+  const installmentCurrent = Math.min(Math.max(1, parseInt($('input-installment-current').value, 10) || 1), installmentTotal);
   const isRecurring = !editingTxId && !$('field-recurring-toggle').classList.contains('hidden') && $('input-is-recurring').checked;
 
   $('btn-save-tx').disabled = true;
@@ -557,25 +566,23 @@ $('form-add-tx').addEventListener('submit', async (e) => {
       toast('Transação atualizada!');
     } else if (isInstallment) {
       const groupId = txCollection.doc().id;
-      const perBaseCents = Math.floor(amountCents / installmentTotal);
-      const remainder = amountCents - perBaseCents * installmentTotal;
+      const remainingInstallments = installmentTotal - installmentCurrent + 1;
       const batch = db.batch();
-      for (let n = 0; n < installmentTotal; n++) {
-        const cents = perBaseCents + (n < remainder ? 1 : 0);
+      for (let idx = installmentCurrent; idx <= installmentTotal; idx++) {
         const docRef = txCollection.doc();
         batch.set(docRef, {
           ...baseData,
-          amount: cents / 100,
-          description: `${baseDescription || 'Compra parcelada'} (parcela ${n + 1}/${installmentTotal})`,
-          date: addMonthsClamped(baseDate, n),
+          amount: amountCents / 100,
+          description: `${baseDescription || 'Compra parcelada'} (parcela ${idx}/${installmentTotal})`,
+          date: addMonthsClamped(baseDate, idx - installmentCurrent),
           installmentGroupId: groupId,
-          installmentIndex: n + 1,
+          installmentIndex: idx,
           installmentTotal,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
       }
       await batch.commit();
-      toast(`${installmentTotal} parcelas lançadas!`);
+      toast(`${remainingInstallments} parcela${remainingInstallments > 1 ? 's' : ''} lançada${remainingInstallments > 1 ? 's' : ''}!`);
     } else if (isRecurring) {
       const groupId = txCollection.doc().id;
       const batch = db.batch();
