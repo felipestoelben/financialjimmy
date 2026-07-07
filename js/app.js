@@ -237,6 +237,7 @@ async function topUpRecurringSeries() {
         date: addMonthsClamped(latest.date, n),
         isRecurring: true,
         recurringGroupId: latest.recurringGroupId,
+        status: 'pago',
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
     }
@@ -272,25 +273,33 @@ function txForMonth(key) {
 
 function renderHome() {
   const txs = txForMonth(currentHomeMonth);
-  const income = txs.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const expense = txs.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-  const invested = txs.filter((t) => t.type === 'investment').reduce((s, t) => s + t.amount, 0);
+  const paidTxs = txs.filter((t) => t.status !== 'pendente');
+  const income = paidTxs.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const expense = paidTxs.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const invested = paidTxs.filter((t) => t.type === 'investment').reduce((s, t) => s + t.amount, 0);
   $('balance-total').textContent = fmtBRL(income - expense - invested);
   $('balance-income').textContent = fmtBRL(income);
   $('balance-expense').textContent = fmtBRL(expense);
 
+  const pendingTxs = txs.filter((t) => t.status === 'pendente' && t.type === 'expense');
+  const pendingTotal = pendingTxs.reduce((s, t) => s + t.amount, 0);
+  $('pending-month-label').textContent = monthLabel(currentHomeMonth);
+  $('pending-total').textContent = fmtBRL(pendingTotal);
+  $('pending-count').textContent = pendingTxs.length === 1 ? '1 compra' : `${pendingTxs.length} compras`;
+  $('pending-card').classList.toggle('hidden', pendingTxs.length === 0);
+
   $('invest-month-label').textContent = monthLabel(currentHomeMonth);
   $('invest-month').textContent = fmtBRL(invested);
-  const totalInvested = allTransactions.filter((t) => t.type === 'investment').reduce((s, t) => s + t.amount, 0);
+  const totalInvested = allTransactions.filter((t) => t.type === 'investment' && t.status !== 'pendente').reduce((s, t) => s + t.amount, 0);
   $('invest-total').textContent = fmtBRL(totalInvested);
 
   const nextKey = shiftMonthKey(currentHomeMonth, 1);
   $('forecast-month-label').textContent = monthLabel(nextKey);
-  const nextExpense = txForMonth(nextKey).filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const nextExpense = txForMonth(nextKey).filter((t) => t.type === 'expense' && t.status !== 'pendente').reduce((s, t) => s + t.amount, 0);
   $('forecast-next-month').textContent = fmtBRL(nextExpense);
 
   const byCategory = {};
-  txs.filter((t) => t.type === 'expense').forEach((t) => {
+  paidTxs.filter((t) => t.type === 'expense').forEach((t) => {
     byCategory[t.category] = (byCategory[t.category] || 0) + t.amount;
   });
   renderDonut(byCategory, expense, 'expense', $('donut-chart'), $('category-legend'), $('summary-empty'));
@@ -299,6 +308,12 @@ function renderHome() {
   $('recent-tx-list').innerHTML = recent.map(renderTxRow).join('') || '<li class="empty-hint">Nenhuma transação ainda.</li>';
   attachTxRowHandlers($('recent-tx-list'));
 }
+$('pending-card').addEventListener('click', () => {
+  $('history-month-select').value = currentHomeMonth;
+  currentHistoryMonth = currentHomeMonth;
+  showPage('history');
+  renderHistory();
+});
 
 function renderDonut(byCategory, total, type, donutEl, legendEl, emptyEl) {
   const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
@@ -326,19 +341,24 @@ function renderDonut(byCategory, total, type, donutEl, legendEl, emptyEl) {
 }
 
 const ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M4 12.5l5 5L20 6.5"/></svg>';
 
 function renderTxRow(t) {
   const cat = findCategory(t.type, t.category);
   const sign = t.type === 'income' ? '+' : '-';
   const cls = t.type === 'income' ? 'income-value' : t.type === 'investment' ? 'investment-value' : 'expense-value';
   const recurringTag = t.isRecurring ? ' · 🔁 Recorrente' : '';
-  return `<li class="tx-row" data-id="${t.id}">
+  const isPending = t.status === 'pendente';
+  const pendingBadge = isPending ? '<span class="tx-pending-badge">Pendente</span>' : '';
+  const markPaidBtn = isPending ? `<button class="tx-mark-paid" title="Marcar como pago">${ICON_CHECK}</button>` : '';
+  return `<li class="tx-row${isPending ? ' is-pending' : ''}" data-id="${t.id}">
     <span class="tx-icon" style="background:${cat.color}22">${cat.icon}</span>
     <span class="tx-info">
       <span class="tx-desc">${escapeHtml(t.description || cat.label)}</span>
-      <span class="muted">${cat.label}${recurringTag}</span>
+      <span class="muted">${cat.label}${recurringTag}${pendingBadge}</span>
     </span>
     <span class="${cls}">${sign} ${fmtBRL(t.amount)}</span>
+    ${markPaidBtn}
     <button class="tx-delete" title="Excluir">${ICON_X}</button>
   </li>`;
 }
@@ -355,6 +375,15 @@ function attachTxRowHandlers(container) {
       if (!confirm('Excluir esta transação?')) return;
       const uid = auth.currentUser.uid;
       await db.collection('users').doc(uid).collection('transactions').doc(id).delete();
+    });
+  });
+  container.querySelectorAll('.tx-mark-paid').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.closest('.tx-row').dataset.id;
+      const uid = auth.currentUser.uid;
+      await db.collection('users').doc(uid).collection('transactions').doc(id).update({ status: 'pago' });
+      toast('Marcado como pago!');
     });
   });
 }
@@ -397,6 +426,7 @@ function resetAddForm() {
   $('input-date').value = new Date().toISOString().slice(0, 10);
   $('input-installment-total').value = 2;
   $('input-is-recurring').checked = false;
+  $('input-is-pending').checked = false;
   setPaymentMode('avista');
   setTxType('expense');
   $('btn-save-tx').disabled = true;
@@ -417,6 +447,7 @@ function setTxType(type) {
   document.querySelector('.amount-display').className = `amount-display ${type}`;
   updatePaymentModeVisibility();
   updateRecurringToggleVisibility();
+  updatePendingToggleVisibility();
 }
 $('btn-type-expense').addEventListener('click', () => setTxType('expense'));
 $('btn-type-income').addEventListener('click', () => setTxType('income'));
@@ -429,6 +460,7 @@ function setPaymentMode(mode) {
   $('btn-mode-parcelado').classList.toggle('active', mode === 'parcelado');
   $('installment-fields').classList.toggle('hidden', mode !== 'parcelado');
   $('label-date').textContent = mode === 'parcelado' ? 'Data da 1ª parcela' : 'Data';
+  updatePendingToggleVisibility();
 }
 $('btn-mode-avista').addEventListener('click', () => setPaymentMode('avista'));
 $('btn-mode-parcelado').addEventListener('click', () => {
@@ -450,7 +482,15 @@ function updateRecurringToggleVisibility() {
   $('field-recurring-toggle').classList.toggle('hidden', !canRecur);
   if (!canRecur) $('input-is-recurring').checked = false;
 }
-$('input-is-recurring').addEventListener('change', () => updatePaymentModeVisibility());
+$('input-is-recurring').addEventListener('change', () => { updatePaymentModeVisibility(); updatePendingToggleVisibility(); });
+
+function updatePendingToggleVisibility() {
+  const isInstallmentMode = !$('field-payment-mode').classList.contains('hidden') && paymentMode === 'parcelado';
+  const isRecurring = $('input-is-recurring').checked;
+  const canBePending = currentTxType === 'expense' && !isInstallmentMode && !isRecurring;
+  $('field-pending-toggle').classList.toggle('hidden', !canBePending);
+  if (!canBePending) $('input-is-pending').checked = false;
+}
 
 $('input-amount').addEventListener('input', (e) => {
   const digits = e.target.value.replace(/\D/g, '');
@@ -474,8 +514,10 @@ function openEditTransaction(id) {
   $('input-amount').value = (amountCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   $('input-date').value = t.date;
   $('input-payment').value = t.paymentMethod;
+  $('input-is-pending').checked = t.status === 'pendente';
   updatePaymentModeVisibility();
   updateRecurringToggleVisibility();
+  updatePendingToggleVisibility();
   $('btn-save-tx').disabled = false;
   $('add-page-title').textContent = 'Editar transação';
   $('btn-save-tx').textContent = 'Salvar alterações';
@@ -493,10 +535,12 @@ $('form-add-tx').addEventListener('submit', async (e) => {
   $('btn-save-tx').disabled = true;
   const baseDescription = $('input-description').value.trim();
   const baseDate = $('input-date').value;
+  const isPending = !$('field-pending-toggle').classList.contains('hidden') && $('input-is-pending').checked;
   const baseData = {
     type: currentTxType,
     category: $('input-category').value,
     paymentMethod: $('input-payment').value,
+    status: isPending ? 'pendente' : 'pago',
   };
 
   try {

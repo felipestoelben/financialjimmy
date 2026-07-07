@@ -103,6 +103,14 @@
       </div>
     </div>
 
+    <button type="button" class="pending-card hidden" id="pending-card">
+      <div>
+        <span class="eyebrow">Pendente em <span id="pending-month-label"></span></span>
+        <div class="forecast-value" id="pending-total">R$ 0,00</div>
+      </div>
+      <span class="pending-count" id="pending-count"></span>
+    </button>
+
     <div class="forecast-card">
       <span class="eyebrow">Previsto para <span id="forecast-month-label"></span></span>
       <div class="forecast-value" id="forecast-next-month">R$ 0,00</div>
@@ -187,6 +195,10 @@
       <label class="checkbox-field hidden" id="field-recurring-toggle">
         <input type="checkbox" id="input-is-recurring" />
         <span>Assinatura/recorrente (repete todo mês)</span>
+      </label>
+      <label class="checkbox-field hidden" id="field-pending-toggle">
+        <input type="checkbox" id="input-is-pending" />
+        <span>Ainda não paguei (fica pendente até eu marcar como pago)</span>
       </label>
       <button type="submit" class="btn btn-primary" id="btn-save-tx" disabled>Salvar transação</button>
       <p class="error-msg" id="add-tx-error"></p>
