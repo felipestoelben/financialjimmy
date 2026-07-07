@@ -78,7 +78,6 @@ function setValuesHidden(hidden) {
   applyHideValuesUI();
   renderHome();
   renderHistory();
-  renderInvestments();
 }
 $('btn-toggle-hide-values').addEventListener('click', () => setValuesHidden(!valuesHidden));
 $('input-hide-values').addEventListener('change', (e) => setValuesHidden(e.target.checked));
@@ -200,7 +199,6 @@ function listenToTransactions(uid) {
       populateMonthSelects();
       renderHome();
       renderHistory();
-      renderInvestments();
       topUpRecurringSeries().catch((err) => console.error('Falha ao renovar assinaturas recorrentes', err));
     }, (err) => {
       console.error(err);
@@ -262,7 +260,7 @@ function populateMonthSelects() {
   currentHomeMonth = $('home-month-select').value;
   currentHistoryMonth = $('history-month-select').value;
 }
-$('home-month-select').addEventListener('change', (e) => { currentHomeMonth = e.target.value; renderHome(); renderInvestments(); });
+$('home-month-select').addEventListener('change', (e) => { currentHomeMonth = e.target.value; renderHome(); });
 $('history-month-select').addEventListener('change', (e) => { currentHistoryMonth = e.target.value; renderHistory(); });
 $('history-search').addEventListener('input', () => renderHistory());
 $('btn-see-all').addEventListener('click', () => { $('history-month-select').value = currentHomeMonth; currentHistoryMonth = currentHomeMonth; showPage('history'); renderHistory(); });
@@ -300,23 +298,6 @@ function renderHome() {
   const recent = allTransactions.slice(0, 5);
   $('recent-tx-list').innerHTML = recent.map(renderTxRow).join('') || '<li class="empty-hint">Nenhuma transação ainda.</li>';
   attachTxRowHandlers($('recent-tx-list'));
-}
-
-function renderInvestments() {
-  const invested = txForMonth(currentHomeMonth).filter((t) => t.type === 'investment').reduce((s, t) => s + t.amount, 0);
-  $('invest-page-month-label').textContent = monthLabel(currentHomeMonth);
-  $('invest-page-month-value').textContent = fmtBRL(invested);
-
-  const investmentTx = allTransactions.filter((t) => t.type === 'investment');
-  const totalInvested = investmentTx.reduce((s, t) => s + t.amount, 0);
-  $('invest-page-total-value').textContent = fmtBRL(totalInvested);
-
-  const byCategory = {};
-  investmentTx.forEach((t) => { byCategory[t.category] = (byCategory[t.category] || 0) + t.amount; });
-  renderDonut(byCategory, totalInvested, 'investment', $('donut-chart-invest'), $('category-legend-invest'), $('invest-summary-empty'));
-
-  $('invest-tx-list').innerHTML = investmentTx.map(renderTxRow).join('') || '<li class="empty-hint">Nenhum investimento registrado ainda.</li>';
-  attachTxRowHandlers($('invest-tx-list'));
 }
 
 function renderDonut(byCategory, total, type, donutEl, legendEl, emptyEl) {

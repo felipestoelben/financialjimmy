@@ -6,8 +6,8 @@
   "scope": "/financialjimmy/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F6F5F1",
-  "theme_color": "#0A5C32",
+  "background_color": "#0B0A08",
+  "theme_color": "#0B0A08",
   "icons": [
     {
       "src": "icons/icon.svg",

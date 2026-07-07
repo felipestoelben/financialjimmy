@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Jimmy Finanças</title>
 <meta name="description" content="Controle financeiro pessoal simples e rápido" />
-<meta name="theme-color" content="#0A5C32" />
+<meta name="theme-color" content="#0B0A08" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <link rel="manifest" href="manifest.json" />
@@ -206,36 +206,6 @@
     <p class="empty-hint hidden" id="history-empty">Nenhuma transação neste mês.</p>
   </main>
 
-  <!-- INVESTMENTS -->
-  <main id="page-investments" class="page hidden">
-    <header class="topbar">
-      <span class="page-title">Investimentos</span>
-    </header>
-
-    <div class="invest-card">
-      <div>
-        <span class="eyebrow">Investido em <span id="invest-page-month-label"></span></span>
-        <div class="invest-value" id="invest-page-month-value">R$ 0,00</div>
-      </div>
-      <div>
-        <span class="eyebrow">Total investido</span>
-        <div class="invest-value" id="invest-page-total-value">R$ 0,00</div>
-      </div>
-    </div>
-
-    <h2 class="section-title">Carteira por categoria</h2>
-    <div class="summary-card">
-      <div class="donut-wrap">
-        <div class="donut" id="donut-chart-invest"></div>
-      </div>
-      <ul class="legend" id="category-legend-invest"></ul>
-      <p class="empty-hint hidden" id="invest-summary-empty">Nenhum investimento registrado ainda.</p>
-    </div>
-
-    <h2 class="section-title">Histórico de investimentos</h2>
-    <ul class="tx-list" id="invest-tx-list"></ul>
-  </main>
-
   <!-- PROFILE -->
   <main id="page-profile" class="page hidden">
     <header class="topbar">
@@ -281,18 +251,14 @@
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
       <span class="nav-label">Transações</span>
     </button>
+    <button class="nav-btn" data-page="profile">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.3"/><path d="M5 20c1.2-3.7 4.2-5.6 7-5.6s5.8 1.9 7 5.6"/></svg>
+      <span class="nav-label">Perfil</span>
+    </button>
     <button class="nav-btn nav-add" id="btn-open-add" title="Nova transação">
       <span class="nav-add-circle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
       </span>
-    </button>
-    <button class="nav-btn" data-page="investments">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></svg>
-      <span class="nav-label">Investir</span>
-    </button>
-    <button class="nav-btn" data-page="profile">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.3"/><path d="M5 20c1.2-3.7 4.2-5.6 7-5.6s5.8 1.9 7 5.6"/></svg>
-      <span class="nav-label">Perfil</span>
     </button>
   </nav>
 </section>
